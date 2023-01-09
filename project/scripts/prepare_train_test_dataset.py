@@ -33,6 +33,8 @@ The resulting directory structure should look like this:
     │   │   │   ├── ...
 """
 import argparse
+import os
+import pandas as pd
 
 
 def parse_args():
@@ -81,13 +83,47 @@ def main(data_folder, labels, output_data_folder):
         Full path to the directory in which we will store the resulting
         train/test splits.
     """
-    # For this function, you must:
-    #   1. Load labels CSV file
-    #   2. Iterate over each row in the CSV, create the corresponding
-    #      train/test and class folders
-    #   3. Copy the image to the new folder structure. We recommend you to
-    #      use `os.link()` to avoid wasting disk space with duplicated files
-    # TODO
+    if not os.path.isfile(labels):
+        raise FileExistsError("File defined for labels not exists")
+    if not os.path.isdir(data_folder):
+        raise NotADirectoryError("Directory defined for data_folder not found")
+    
+
+    
+    img_location_df = pd.read_csv(
+        filepath_or_buffer= labels
+    )
+
+    source_dir = data_folder
+    count_not_found_images = 0
+    
+    for idx, row in img_location_df.iterrows():
+        source= os.path.join(
+            source_dir,
+            row.img_name
+        )
+        dest_dir= os.path.join(
+            output_data_folder,
+            row.subset,
+            row['class']
+        )
+
+        if not os.path.isdir(dest_dir):
+            os.makedirs(dest_dir)
+
+        dest_path= os.path.join(
+            dest_dir,
+            row.img_name
+        )
+        if os.path.exists(source) and not os.path.exists(dest_path):
+            os.link(
+                src= source,
+                dst= dest_path
+            )
+        elif not os.path.exists(source):
+            count_not_found_images += 1
+    
+    print(count_not_found_images)
 
 
 if __name__ == "__main__":
