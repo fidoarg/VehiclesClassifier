@@ -123,7 +123,6 @@ def main(data_folder, labels, output_data_folder):
         elif not os.path.exists(source):
             count_not_found_images += 1
     
-    print(count_not_found_images)
 
 
 if __name__ == "__main__":
