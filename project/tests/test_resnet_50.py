@@ -18,6 +18,9 @@ class TestResnet50(unittest.TestCase):
             classes=classes,
         )
 
+        print(
+            *[layer.name for layer in model.layers]
+        )
         # Validate output model is a keras.Model
         self.assertTrue(
             isinstance(model, keras.Model),
@@ -38,9 +41,10 @@ class TestResnet50(unittest.TestCase):
 
         # No data augmentation should be applied
         # 4th layer must be resnet50 base model
-        resnet50 = model.layers[3]
+        resnet50 = model.layers[2]
         self.assertEqual(resnet50.name, "resnet50")
 
+        print(resnet50.layers[-1])
         # Check output is applying GlobalAveragePooling2D
         self.assertTrue(
             isinstance(

@@ -48,8 +48,7 @@ def get_vehicle_coordinates(img):
            a position in a numpy.array, we can't use float values.
 
     Parameters
-    ----------
-    img : numpy.ndarray
+    ---------- img : numpy.ndarray
         Image in RGB format.
 
     Returns
@@ -58,7 +57,39 @@ def get_vehicle_coordinates(img):
         List having bounding box coordinates as [left, top, right, bottom].
         Also known as [x1, y1, x2, y2].
     """
-    # TODO
-    box_coordinates = None
+    outputs = DET_MODEL(img)
+    metadata = DET_MODEL.metadata
+    
+    label_map = metadata.get("thing_classes", None)
+
+    truck_index = label_map.index("truck") if "truck" in label_map else None
+    car_index = label_map.index("car") if "car" in label_map else None
+
+    instances = outputs["instances"].to("cpu")
+    labels = [
+        instances.pred_classes[i].item()
+        for i in range(len(instances))
+    ]
+    scores = [
+        instances.scores[i].item()
+        for i in range(len(instances))
+    ]
+
+    # Filter the results to include only cars and trucks
+    vehicles = []
+    for i in range(len(instances)):
+        if labels[i] in [car_index, truck_index]:  
+            bbox = instances.pred_boxes[i].tensor.numpy().astype(int)[0]
+            vehicles.append((bbox[0], bbox[1], bbox[2], bbox[3]))
+
+    if vehicles:
+        # Keep only one bounding box with the largest area
+        largest_bbox = max(vehicles, key=lambda bbox: (bbox[2]-bbox[0]) * (bbox[3]-bbox[1]))
+    else:
+        # No truck or car found in the image
+        height, width = img.shape[:2]
+        largest_bbox = [0, 0, width, height]
+
+    box_coordinates = list(largest_bbox)
 
     return box_coordinates

@@ -9,7 +9,10 @@ same directory structure with its subfolders but with new images.
 """
 
 import argparse
-
+import cv2
+import os
+from project.utils import detection
+from project.utils import utils
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train your model.")
@@ -49,16 +52,31 @@ def main(data_folder, output_data_folder):
     """
     # For this function, you must:
     #   1. Iterate over each image in `data_folder`, you can
-    #      use Python `os.walk()` or `utils.waldir()``
+    #      use Python `os.walk()` or `utils.walkdir()``
     #   2. Load the image
-    #   3. Run the detector and get the vehicle coordinates, use
-    #      utils.detection.get_vehicle_coordinates() for this task
-    #   4. Extract the car from the image and store it in
-    #      `output_data_folder` with the same image name. You may also need
-    #      to create additional subfolders following the original
-    #      `data_folder` structure.
-    # TODO
+    for source_image_dir, source_image_filename in utils.walkdir(data_folder):
+        img_source_file_path= os.path.join(
+            source_image_dir, source_image_filename
+        )
+        img= cv2.imread(img_source_file_path)
+#   3. Run the detector and get the vehicle coordinates, use
+#      utils.detection.get_vehicle_coordinates() for this task
+        box_coordinates = detection.get_vehicle_coordinates(img)
 
+#   4. Extract the car from the image and store it in
+#      `output_data_folder` with the same image name. You may also need
+#      to create additional subfolders following the original
+#      `data_folder` structure.
+        x1, y1, x2, y2 = box_coordinates
+        cropped_img = img[y1:y2, x1:x2, :]
+
+        dest_image_dir = source_image_dir.replace(data_folder, output_data_folder)
+        if not os.path.isdir(dest_image_dir):
+            os.makedirs(dest_image_dir)
+        img_dest_file_path= os.path.join(
+            dest_image_dir, source_image_filename
+        )
+        cv2.imwrite(img_dest_file_path, cropped_img)
 
 if __name__ == "__main__":
     args = parse_args()

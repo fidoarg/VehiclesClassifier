@@ -44,6 +44,6 @@ def create_data_aug_layer(data_aug_layer: dict):
 
     # Return a keras.Sequential model having the the new layers created
     # Assign to `data_augmentation` variable
-    data_augmentation = Sequential(data_aug_layers) if len(data_aug_layers) else None
+    data_augmentation = Sequential(data_aug_layers)
 
     return data_augmentation

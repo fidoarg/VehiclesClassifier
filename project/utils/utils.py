@@ -1,5 +1,5 @@
 import os
-
+import yaml
 
 def validate_config(config):
     """
@@ -37,9 +37,11 @@ def load_config(config_file_path):
     config : dict
         Experiment settings as a Python dict.
     """
-    # TODO
-    # Load config here and assign to `config` variable
-    config = None
+    if not os.path.exists(config_file_path):
+        raise FileNotFoundError(f"No file found with path: {config_file_path}")
+    
+    with open(file= config_file_path, mode= 'r') as yaml_file:
+        config = yaml.safe_load(yaml_file.read())
 
     # Don't remove this as will help you doing some basic checks on config
     # content

@@ -1,5 +1,13 @@
-from utils.data_aug import create_data_aug_layer
+import os
 
+from utils.data_aug import create_data_aug_layer
+from keras.applications.resnet import preprocess_input, ResNet50
+from keras.layers import Input, Lambda, Dropout, GlobalAveragePooling2D, Dense
+from keras import Model
+from keras.models import load_model
+
+def preprocess_layer(inputs):
+    return preprocess_input(inputs)
 
 def create_model(
     weights: str = "imagenet",
@@ -68,18 +76,25 @@ def create_model(
         # Use keras.layers.Input(), following this requirements:
         #   1. layer dtype must be tensorflow.float32
         # TODO
-        input = None
+        input = Input(shape= input_shape, name= 'input_layer')
 
         # Create the data augmentation layers here and add to the model next
         # to the input layer
         # If no data augmentation was used, skip this
-        # TODO
-
+        if data_aug_layer:
+            data_augmentation_layers = create_data_aug_layer(data_aug_layer)
+            x = data_augmentation_layers(input)
+        else:
+            x = None
         # Add a layer for preprocessing the input images values
         # E.g. change pixels interval from [0, 255] to [0, 1]
         # Resnet50 already has a preprocessing function you must use here
         # See keras.applications.resnet50.preprocess_input()
-        # TODO
+        if x is None:
+            x = Lambda(preprocess_layer, name= 'preprocess_layer')(input)
+        else:
+            x = Lambda(preprocess_layer, name= 'preprocess_layer')(x)
+
 
         # Create the corresponding core model using
         # keras.applications.ResNet50()
@@ -87,28 +102,36 @@ def create_model(
         #   1. Use imagenet weights
         #   2. Drop top layer (imagenet classification layer)
         #   3. Use Global average pooling as model output
-        # TODO
-
+        resnet50 = ResNet50(include_top= False, weights= 'imagenet', pooling= 'avg')
+        for layer in resnet50.layers[:-1]:
+            layer.trainable = False
+        x = resnet50(x)
         # Add a single dropout layer for regularization, use
         # keras.layers.Dropout()
-        # TODO
+        #
+        x = Dropout(dropout_rate)(x)
 
         # Add the classification layer here, use keras.layers.Dense() and
         # `classes` parameter
         # Assign it to `outputs` variable
         # TODO
-        outputs = None
+        outputs = Dense(classes, activation= 'softmax')(x)
 
         # Now you have all the layers in place, create a new model
         # Use keras.Model()
         # Assign it to `model` variable
         # TODO
-        model = None
+        model = Model(input, outputs)
     else:
         # For this particular case we want to load our already defined and
         # finetuned model, see how to do this using keras
         # Assign it to `model` variable
         # TODO
-        model = None
+        if os.path.exists(weights):
+            model = load_model(weights)
+        else:
+            raise FileNotFoundError(f"No model found in {weights} path")
+
+    
 
     return model

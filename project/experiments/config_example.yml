@@ -11,11 +11,11 @@ data:
 model:
     weights: "imagenet"
     input_shape: [224, 224, 3]
-    classes: 500
+    classes: 196
     dropout_rate: 0.2
     data_aug_layer:
         random_flip:
-            mode: "horizontal_and_vertical"
+            mode: "horizontal"
         random_rotation:
             factor: 0.2
         random_zoom:
