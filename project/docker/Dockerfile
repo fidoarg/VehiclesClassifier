@@ -14,7 +14,7 @@ RUN apt-get update && \
     curl
 
 # Add a non-root user
-# RUN addgroup --gid $GROUP_ID app
+RUN addgroup --gid $GROUP_ID app
 RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID app
 USER app
 
