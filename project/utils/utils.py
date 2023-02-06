@@ -1,5 +1,7 @@
 import os
 import yaml
+import numpy as np
+from keras.preprocessing import image as image_utils
 
 def validate_config(config):
     """
@@ -141,7 +143,18 @@ def predict_from_folder(folder, model, input_size, class_names):
     # the highest probability and use that to get the corresponding class
     # name from `class_names` list.
     # TODO
-    predictions = None
-    labels = None
+    prediction = []
+    labels = []
 
-    return predictions, labels
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            if file.endswith('.jpg') or file.endswith('.jpeg') or file.endswith('.png'):
+                file_path = os.path.join(root, file)
+                image = image_utils.load_img(file_path, target_size=input_size)
+                image = image_utils.img_to_array(image)
+                image = np.expand_dims(image, axis=0)
+
+                prediction.append(class_names[np.argmax(model.predict(image))])
+                labels.append(file.split('_')[0])
+
+    return prediction, labels
