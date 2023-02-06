@@ -11,8 +11,8 @@ same directory structure with its subfolders but with new images.
 import argparse
 import cv2
 import os
-from project.utils import detection
-from project.utils import utils
+from utils import detection
+from utils import utils
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train your model.")
