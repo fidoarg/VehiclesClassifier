@@ -103,7 +103,7 @@ def create_model(
         #   2. Drop top layer (imagenet classification layer)
         #   3. Use Global average pooling as model output
         resnet50 = ResNet50(include_top= False, weights= 'imagenet', pooling= 'avg')
-        for layer in resnet50.layers[:-1]:
+        for layer in resnet50.layers[:-10]:
             layer.trainable = False
         x = resnet50(x)
         # Add a single dropout layer for regularization, use
