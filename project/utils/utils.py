@@ -155,6 +155,6 @@ def predict_from_folder(folder, model, input_size, class_names):
                 image = np.expand_dims(image, axis=0)
 
                 prediction.append(class_names[np.argmax(model.predict(image))])
-                labels.append(file.split('_')[0])
+                labels.append(root.split('/')[-1])
 
     return prediction, labels
